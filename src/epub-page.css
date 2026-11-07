@@ -1,0 +1,28 @@
+/* The page box has its own margins, independent of html/body margins.
+   Older paginated EPUB engines may use both even for a fixed-layout book. */
+@page {
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #fff;
+    /* Image-only pages must not reserve a text baseline below the image. */
+    font-size: 0;
+    line-height: 0;
+}
+
+svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}

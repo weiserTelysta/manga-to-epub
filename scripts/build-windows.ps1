@@ -24,6 +24,7 @@ try {
     Copy-Item "assets/licenses/UNRAR.txt" "$Portable/UNRAR-LICENSE.txt" -Force
     New-Item -ItemType Directory -Force -Path "$Portable/docs" | Out-Null
     Copy-Item "docs/preview.png" "$Portable/docs/preview.png" -Force
+    Copy-Item "docs/UI-DESIGN.md", "docs/PLATFORMS.md", "docs/MANGA-WORKFLOW.md", "docs/DEVELOPMENT.md", "docs/READER-COMPATIBILITY.md", "docs/VALIDATION.md" "$Portable/docs" -Force
     Copy-Item "docs/使用说明.txt" "$Portable/使用说明.txt" -Force
     Compress-Archive -Path $Portable -DestinationPath "dist/Telysta-Windows-x64.zip" -Force
     Write-Host "Ready: $Portable/Telysta.exe" -ForegroundColor Green

@@ -1,9 +1,9 @@
 [package]
 name = "telysta"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.93"
-description = "A Rosé Pine desktop studio for turning image collections into EPUB, PDF and CBZ books."
+description = "A calm, accessible Rust desktop studio for creating EPUB, PDF and CBZ books."
 license = "MIT"
 default-run = "telysta"
 build = "build.rs"
@@ -15,7 +15,7 @@ gui = ["dep:eframe", "dep:rfd", "dep:open"]
 [dependencies]
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
-eframe = { version = "0.33.3", default-features = false, features = ["default_fonts", "glow", "x11"], optional = true }
+eframe = { version = "0.33.3", default-features = false, features = ["accesskit", "default_fonts", "glow", "persistence", "wayland", "x11"], optional = true }
 flate2 = "1"
 image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp", "gif", "bmp", "tiff"] }
 lopdf = { version = "0.47", default-features = false }

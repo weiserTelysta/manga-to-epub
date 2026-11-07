@@ -1,10 +1,11 @@
 Telysta · 图片成书
 
-适用于 Windows 10 / 11（64 位）。
+适用于 Windows 10 / 11（64 位）、Linux 桌面、macOS 11+（Intel / Apple Silicon）。
 
 开始使用
 1. 将便携包完整解压到任意文件夹。
-2. 双击 Telysta.exe；不需要安装 Rust、Python 或 7-Zip。
+2. Windows 双击 Telysta.exe，Linux 运行 ./telysta，macOS 打开 Telysta.app。
+   不需要安装 Rust、Python 或 7-Zip。Linux 的桌面依赖及 macOS 首次打开方式见 docs/PLATFORMS.md。
 3. 点击「选择文件」或「选择文件夹」，也可以把文件拖进窗口。
 4. 输出格式默认 EPUB，也可选择 PDF 或 CBZ。
 5. 点击「开始制作」。完成后点击「打开输出文件夹」。
@@ -18,8 +19,13 @@ Telysta · 图片成书
 多个压缩包：每个压缩包各生成一本书。
 一起选择多张图片：合并成一本书。
 图片文件夹：含子文件夹的图片合成一本；其中的压缩包各自成书。
-图片按文件名自然排序（1、2、10），第一张图片作为 EPUB 封面。
+图片按文件名自然排序（1、2、10），推荐将封面命名为 0001.jpg。
+第一张图片同时是 EPUB 封面和第一张阅读页，不额外插入或重复添加封面页。
 点击队列中的书籍，可在右侧修改书名。
+窄窗口会将设置移到队列下方，向下滚动即可访问。
+作者、阅读方向、JPEG 质量和同时制作数量位于「更多选项」。
+默认最多同时制作 2 本，可调整为 1–8 本；单本内部始终保持页序。
+内存较小时可以设为 1 本；RAR 解压阶段会自动排队保护。
 
 支持的输入
 ZIP、CBZ、7Z、RAR、CBR、TAR、TAR.GZ、TGZ。
@@ -30,17 +36,36 @@ EPUB：一图一页，固定版式；WebP 等格式自动转成 JPEG。
 PDF：一图一页，按原图比例排版。
 CBZ：保留图片原始字节，适合漫画阅读器。
 
+实体阅读器
+EPUB 需要阅读器支持固定版式。新版已显式清除分页和正文边距。
+汉王 N10 自带阅读器直接打开 EPUB 的留白问题，与 Kindle 经 Calibre 转换的情况分别排查。
+请用新版重新制作并以新书名导入；阅读器自身的边距、页眉页脚或二次转换仍可能影响显示。
+可以直接制作 PDF、通过 USB 导入作对照，绕开 EPUB 的文字排版过程。
+图片和屏幕比例不一致时，完整显示图片仍可能留白；不会为铺满屏幕而自动裁切或拉伸。
+详细说明见 docs/READER-COMPATIBILITY.md。目前尚未在 N10 或 Kindle 实机复测修正后的文件。
+
 其他说明
 EPUB / PDF 中动画 GIF、多页 TIFF 只取第一帧 / 第一页。
 EPUB 中 JPEG / PNG 原图通常直接保留，WebP 转 JPEG 可能增加文件体积。
-7Z / RAR / TAR 使用示意封面；ZIP 和图片文件夹可预览第一张图片。
+ZIP 和图片文件夹可显示封面缩略图；点击「预览封面」或双击队列可放大查看。
+7Z / RAR / TAR 显示文件图标，不重复解压预览。
 暂不支持加密压缩包和压缩包内嵌套的压缩包。
-转换出错时，可把鼠标放在队列的错误提示上查看详情。
+转换出错时，点击错误行查看完整原因，修正后可以重试。
 停止制作后，正在制作的临时文件会清理，已经完成的书籍会保留。
+
+外观与快捷键
+右上角按钮切换校园浅色与深色主题；右键可选择 Rosé Pine；下次启动会恢复主题。
+Ctrl+O（macOS 为 ⌘+O）：选择文件。
+Ctrl+Shift+O（macOS 为 ⌘+Shift+O）：选择文件夹。
+Ctrl+Enter（macOS 为 ⌘+Enter）：开始制作。
+Esc：关闭说明、封面预览和错误详情。
+Tab / Shift+Tab：移动控件焦点。
 
 命令行版本（可选）
 telysta-cli.exe "漫画.zip"
 telysta-cli.exe "图片文件夹" --format pdf --output "D:\电子书"
+telysta-cli.exe first.zip second.zip third.7z --jobs 3
 telysta-cli.exe --help
+Linux / macOS 下命令名为 ./telysta-cli，其余参数相同。
 
 更多开发和打包说明见 README.md。

@@ -331,7 +331,12 @@ fn write_epub(
     zip_file(&mut zip, "mimetype", b"application/epub+zip", true)?;
     zip_file(&mut zip, "META-INF/container.xml", br#"<?xml version="1.0" encoding="UTF-8"?>
 <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/package.opf" media-type="application/oebps-package+xml"/></rootfiles></container>"#, false)?;
-    zip_file(&mut zip, "OEBPS/style.css", b"html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#fff}svg{display:block;width:100%;height:100%}", false)?;
+    zip_file(
+        &mut zip,
+        "OEBPS/style.css",
+        include_bytes!("epub-page.css"),
+        false,
+    )?;
     let title = xml(&options.title);
     let author = xml(if options.author.trim().is_empty() {
         "佚名"
@@ -357,7 +362,7 @@ fn write_epub(
         let xhtml = format!(
             r#"<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN"><head><title>{title} · 第 {n} 页</title><meta name="viewport" content="width={w}, height={h}"/><link rel="stylesheet" type="text/css" href="../style.css"/></head><body><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="第 {n} 页"><image width="{w}" height="{h}" xlink:href="../{image_name}"/></svg></body></html>"#,
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN"><head><title>{title} · 第 {n} 页</title><meta name="viewport" content="width={w}, height={h}"/><link rel="stylesheet" type="text/css" href="../style.css"/></head><body><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="{w}" height="{h}" viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="第 {n} 页"><image x="0" y="0" width="{w}" height="{h}" xlink:href="../{image_name}"/></svg></body></html>"#,
             w = page.width,
             h = page.height
         );

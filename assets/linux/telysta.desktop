@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Telysta
+Comment=Turn local manga image archives into EPUB, PDF and CBZ books
+Comment[zh_CN]=将本地漫画图片压缩包制作成电子书
+Exec=telysta %F
+Icon=telysta
+Terminal=false
+Categories=Graphics;Office;
+Keywords=EPUB;Manga;Comic;漫画;电子书;
+StartupWMClass=Telysta

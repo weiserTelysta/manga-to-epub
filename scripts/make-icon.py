@@ -6,9 +6,9 @@ import zlib
 
 ROOT = Path(__file__).resolve().parents[1]
 SIZE, SCALE = 128, 3
-BASE = (25, 23, 36)
-ROSE = (235, 188, 186)
-IRIS = (196, 167, 231)
+BASE = (244, 248, 252)
+ROSE = (20, 117, 173)
+IRIS = (114, 208, 226)
 
 
 def segment_distance(x, y, a, b):
@@ -53,4 +53,6 @@ png += chunk(b'IDAT', zlib.compress(bytes(raw), 9)) + chunk(b'IEND', b'')
 (ROOT / 'assets/telysta.png').write_bytes(png)
 ico = struct.pack('<HHH', 0, 1, 1) + struct.pack('<BBBBHHII', SIZE, SIZE, 0, 0, 1, 32, len(png), 22) + png
 (ROOT / 'assets/telysta.ico').write_bytes(ico)
+icns = b'icns' + struct.pack('>I', len(png)+16) + b'ic07' + struct.pack('>I',len(png)+8) + png
+(ROOT / 'assets/telysta.icns').write_bytes(icns)
 print('Generated assets/telysta.png and assets/telysta.ico')

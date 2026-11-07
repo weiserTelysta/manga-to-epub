@@ -1,0 +1,75 @@
+name: Build desktop applications
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, ui-redesign]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Lint
+        run: cargo clippy --locked --all-targets -- -D warnings
+      - name: Test and package
+        shell: pwsh
+        run: ./scripts/build-windows.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Telysta-Windows-x64
+          path: dist/Telysta-Windows-x64.zip
+          if-no-files-found: error
+          retention-days: 90
+
+  linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Desktop build and smoke-test dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential pkg-config libxkbcommon-dev libxkbcommon-x11-0 libwayland-dev libgl1-mesa-dev libxcb-shape0-dev libxcb-xfixes0-dev libxrandr-dev libxi-dev libxcursor-dev xvfb
+      - name: Test and package
+        run: bash scripts/build-linux.sh
+      - name: GUI smoke test
+        run: xvfb-run -a env TELYSTA_SCREENSHOT="$RUNNER_TEMP/telysta.png" TELYSTA_THEME=campus dist/Telysta-Linux-x86_64/telysta
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Telysta-Linux-x86_64
+          path: dist/Telysta-Linux-x86_64.tar.gz
+          if-no-files-found: error
+          retention-days: 90
+
+  macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Test and build Intel + Apple Silicon app
+        run: bash scripts/build-macos.sh
+      - name: Verify universal CLI on the native Mac runner
+        run: dist/Telysta-macOS-universal/telysta-cli --version
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Telysta-macOS-universal
+          path: dist/Telysta-macOS-universal.zip
+          if-no-files-found: error
+          retention-days: 90

@@ -414,3 +414,126 @@ fn filenames_are_valid_on_windows() {
     assert_eq!(safe_filename("..."), "未命名书籍");
     assert_eq!(safe_filename("book. "), "book");
 }
+
+#[test]
+fn numbered_first_image_is_both_the_cover_and_the_first_reading_page() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("漫画图片包.zip");
+    archive(
+        &path,
+        &[
+            ("漫画/0003.png", png([0, 0, 255])),
+            ("漫画/0001.png", png([255, 0, 0])),
+            ("漫画/0002.png", png([0, 255, 0])),
+        ],
+    );
+    let source = BookSource::Path(path);
+    let result = convert(
+        &source,
+        &ConversionOptions::for_source(&source),
+        &AtomicBool::new(false),
+        |_| {},
+    )
+    .unwrap();
+    let mut zip = ZipArchive::new(File::open(result.path).unwrap()).unwrap();
+    let opf = zip_text(&mut zip, "OEBPS/package.opf");
+    assert!(opf.contains("id=\"image-1\" href=\"images/page-00001.png\" media-type=\"image/png\" properties=\"cover-image\""));
+    assert!(opf.contains(
+        "<spine toc=\"ncx\" page-progression-direction=\"ltr\"><itemref idref=\"page-1\"/>"
+    ));
+    assert!(zip_text(&mut zip, "OEBPS/text/page-00001.xhtml").contains("../images/page-00001.png"));
+    let mut bytes = Vec::new();
+    zip.by_name("OEBPS/images/page-00001.png")
+        .unwrap()
+        .read_to_end(&mut bytes)
+        .unwrap();
+    assert_eq!(
+        image::load_from_memory(&bytes)
+            .unwrap()
+            .to_rgb8()
+            .get_pixel(0, 0)
+            .0,
+        [255, 0, 0]
+    );
+}
+
+#[test]
+fn epub_pages_have_no_publisher_margins_and_match_each_original_image() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut paths = Vec::new();
+    let dimensions = [(600, 900), (900, 600), (800, 800)];
+    for (i, (width, height)) in dimensions.iter().copied().enumerate() {
+        let path = dir.path().join(format!("{i:04}.png"));
+        RgbImage::from_pixel(width, height, Rgb([30, 60, 90]))
+            .save(&path)
+            .unwrap();
+        paths.push(path);
+    }
+    let source = BookSource::Images(paths.clone());
+    let result = convert(
+        &source,
+        &ConversionOptions::for_source(&source),
+        &AtomicBool::new(false),
+        |_| {},
+    )
+    .unwrap();
+    let mut zip = ZipArchive::new(File::open(result.path).unwrap()).unwrap();
+    let css = zip_text(&mut zip, "OEBPS/style.css");
+    assert!(css.contains("@page {\n    margin: 0;\n    padding: 0;\n}"));
+    assert!(css.contains("margin: 0 !important;"));
+    assert!(css.contains("line-height: 0;"));
+    assert!(
+        zip_text(&mut zip, "OEBPS/package.opf")
+            .contains("<meta property=\"rendition:layout\">pre-paginated</meta>")
+    );
+    for (i, (width, height)) in dimensions.iter().enumerate() {
+        let n = i + 1;
+        let xhtml = zip_text(&mut zip, &format!("OEBPS/text/page-{n:05}.xhtml"));
+        let mut reader = quick_xml::Reader::from_str(&xhtml);
+        let mut checked = 0;
+        loop {
+            match reader.read_event().unwrap() {
+                quick_xml::events::Event::Eof => break,
+                quick_xml::events::Event::Start(tag) | quick_xml::events::Event::Empty(tag) => {
+                    let attr = |name| {
+                        tag.try_get_attribute(name)
+                            .unwrap()
+                            .unwrap()
+                            .normalized_value(quick_xml::XmlVersion::Implicit1_0)
+                            .unwrap()
+                            .into_owned()
+                    };
+                    match tag.name().as_ref() {
+                        b"meta" => {
+                            assert_eq!(attr("name"), "viewport");
+                            assert_eq!(attr("content"), format!("width={width}, height={height}"));
+                            checked += 1;
+                        }
+                        b"svg" => {
+                            assert_eq!(attr("viewBox"), format!("0 0 {width} {height}"));
+                            assert_eq!(attr("preserveAspectRatio"), "xMidYMid meet");
+                            checked += 1;
+                        }
+                        b"image" => {
+                            assert_eq!(attr("x"), "0");
+                            assert_eq!(attr("y"), "0");
+                            assert_eq!(attr("width"), width.to_string());
+                            assert_eq!(attr("height"), height.to_string());
+                            checked += 1;
+                        }
+                        _ => {}
+                    }
+                }
+                _ => {}
+            }
+        }
+        assert_eq!(checked, 3);
+        let mut bytes = Vec::new();
+        zip.by_name(&format!("OEBPS/images/page-{n:05}.png"))
+            .unwrap()
+            .read_to_end(&mut bytes)
+            .unwrap();
+        // Layout fixes must not add white pixels, crop or stretch source images.
+        assert_eq!(bytes, fs::read(&paths[i]).unwrap());
+    }
+}

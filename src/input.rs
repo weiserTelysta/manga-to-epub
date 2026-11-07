@@ -6,7 +6,10 @@ use std::{
     fs::{self, File},
     io::{self, Read, Write},
     path::{Path, PathBuf},
-    sync::atomic::{AtomicBool, Ordering as AtomicOrdering},
+    sync::{
+        Mutex, TryLockError,
+        atomic::{AtomicBool, Ordering as AtomicOrdering},
+    },
 };
 use tempfile::TempDir;
 use walkdir::WalkDir;
@@ -14,6 +17,9 @@ use walkdir::WalkDir;
 pub const MAX_PAGE_BYTES: u64 = 128 * 1024 * 1024;
 const MAX_TOTAL_BYTES: u64 = 8 * 1024 * 1024 * 1024;
 const MAX_PAGES: usize = 50_000;
+// UnRAR contains process-global state. Serialize its extraction stage while
+// allowing other archive types and all book-writing stages to run in parallel.
+static RAR_LOCK: Mutex<()> = Mutex::new(());
 
 pub fn extension(path: &Path) -> String {
     path.extension()
@@ -315,6 +321,16 @@ fn extract_7z(path: &Path, sink: &mut Extractor<'_>) -> Result<()> {
 }
 
 fn extract_rar(path: &Path, sink: &mut Extractor<'_>) -> Result<()> {
+    let _guard = loop {
+        check_cancel(sink.cancel)?;
+        match RAR_LOCK.try_lock() {
+            Ok(guard) => break guard,
+            Err(TryLockError::WouldBlock) => {
+                std::thread::sleep(std::time::Duration::from_millis(20))
+            }
+            Err(TryLockError::Poisoned(_)) => bail!("RAR 解压器状态异常，请重启程序后再试"),
+        }
+    };
     let mut archive = unrar::Archive::new(path)
         .open_for_processing()
         .context("无法读取 RAR；请确认文件完整且未加密")?;
