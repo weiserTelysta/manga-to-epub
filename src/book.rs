@@ -362,7 +362,7 @@ fn write_epub(
         let xhtml = format!(
             r#"<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN"><head><title>{title} · 第 {n} 页</title><meta name="viewport" content="width={w}, height={h}"/><link rel="stylesheet" type="text/css" href="../style.css"/></head><body><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="{w}" height="{h}" viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="第 {n} 页"><image x="0" y="0" width="{w}" height="{h}" xlink:href="../{image_name}"/></svg></body></html>"#,
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN"><head><title>{title} · 第 {n} 页</title><meta name="viewport" content="width={w}, height={h}"/><link rel="stylesheet" type="text/css" href="../style.css"/></head><body><img src="../{image_name}" width="{w}" height="{h}" alt="第 {n} 页"/></body></html>"#,
             w = page.width,
             h = page.height
         );
@@ -372,7 +372,7 @@ fn write_epub(
             xhtml.as_bytes(),
             false,
         )?;
-        manifest.push_str(&format!(r#"<item id="image-{n}" href="{image_name}" media-type="{}"{}/><item id="page-{n}" href="{page_name}" media-type="application/xhtml+xml" properties="svg"/>"#, page.media_type, if n == 1 { " properties=\"cover-image\"" } else { "" }));
+        manifest.push_str(&format!(r#"<item id="image-{n}" href="{image_name}" media-type="{}"{}/><item id="page-{n}" href="{page_name}" media-type="application/xhtml+xml"/>"#, page.media_type, if n == 1 { " properties=\"cover-image\"" } else { "" }));
         spine.push_str(&format!(r#"<itemref idref="page-{n}"/>"#));
         nav.push_str(&format!(r#"<li><a href="{page_name}">第 {n} 页</a></li>"#));
         ncx.push_str(&format!(r#"<navPoint id="nav-{n}" playOrder="{n}"><navLabel><text>第 {n} 页</text></navLabel><content src="{page_name}"/></navPoint>"#));

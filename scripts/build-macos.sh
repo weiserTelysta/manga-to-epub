@@ -28,7 +28,7 @@ for telysta_binary in telysta telysta-cli; do
   fi
   lipo -create "$telysta_build/x86_64-apple-darwin/release/$telysta_binary" "$telysta_build/aarch64-apple-darwin/release/$telysta_binary" -output "$telysta_destination"
   chmod 755 "$telysta_destination"
-  lipo -verify_arch x86_64 arm64 "$telysta_destination"
+  lipo "$telysta_destination" -verify_arch x86_64 arm64
 done
 cp assets/macos/Info.plist "$telysta_app/Contents/Info.plist"
 cp assets/telysta.icns "$telysta_app/Contents/Resources/telysta.icns"

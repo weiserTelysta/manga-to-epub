@@ -84,7 +84,8 @@ macOS:   bash scripts/build-macos.sh
 
 EPUB 为固定版式、一图一页，包含封面、目录、阅读顺序及兼容 NCX。正常方向 JPEG / PNG 尽量直接保留，WebP 等转为 JPEG；转码会应用 EXIF 方向，透明区域铺白。PDF 统一使用 RGB JPEG，CBZ 保留图片原始字节。
 
-实体阅读器需要支持 EPUB 固定版式；汉王 N10 自带阅读器和 Kindle 经 Calibre 转换的显示反馈、分页边距修正与对照办法见 [阅读器兼容性说明](docs/READER-COMPATIBILITY.md)。新版输出已显式清除分页边距；设备自身留白和二次转换仍需实机核对。
+新版采用直接图片排版，解决旧 SVG 页面在汉王 N10 上缩小的问题，对照版已由用户实测恢复正常大小。
+汉王 N10 与 Kindle 经 Calibre 转换的两条路径分别记录在 [阅读器兼容性说明](docs/READER-COMPATIBILITY.md)。旧书需重新制作，Kindle 的二次转换仍需单独核对。
 
 转码质量默认 90%；WebP 转 JPEG 后体积可能增加。GIF / 多页 TIFF 在 EPUB / PDF 中仅取第一帧 / 第一页。
 当前不支持加密包或包内嵌套压缩包。自动忽略隐藏文件、`__MACOSX` 与生成的 `Telysta Books`，不跟随目录中的符号链接。

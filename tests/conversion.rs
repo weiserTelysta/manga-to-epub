@@ -479,9 +479,13 @@ fn epub_pages_have_no_publisher_margins_and_match_each_original_image() {
     .unwrap();
     let mut zip = ZipArchive::new(File::open(result.path).unwrap()).unwrap();
     let css = zip_text(&mut zip, "OEBPS/style.css");
-    assert!(css.contains("@page {\n    margin: 0;\n    padding: 0;\n}"));
+    let compact_css = css.split_whitespace().collect::<String>();
+    assert!(compact_css.contains("@page{margin:0;padding:0;}"));
     assert!(css.contains("margin: 0 !important;"));
     assert!(css.contains("line-height: 0;"));
+    assert!(css.contains("height: auto;"));
+    assert!(css.contains("max-width: 100%;"));
+    assert!(!css.contains("font-size: 0;"));
     assert!(
         zip_text(&mut zip, "OEBPS/package.opf")
             .contains("<meta property=\"rendition:layout\">pre-paginated</meta>")
@@ -489,6 +493,8 @@ fn epub_pages_have_no_publisher_margins_and_match_each_original_image() {
     for (i, (width, height)) in dimensions.iter().enumerate() {
         let n = i + 1;
         let xhtml = zip_text(&mut zip, &format!("OEBPS/text/page-{n:05}.xhtml"));
+        // The N10 reader mis-sizes the old SVG wrapper. Use direct XHTML images.
+        assert!(!xhtml.contains("<svg"));
         let mut reader = quick_xml::Reader::from_str(&xhtml);
         let mut checked = 0;
         loop {
@@ -509,16 +515,10 @@ fn epub_pages_have_no_publisher_margins_and_match_each_original_image() {
                             assert_eq!(attr("content"), format!("width={width}, height={height}"));
                             checked += 1;
                         }
-                        b"svg" => {
-                            assert_eq!(attr("viewBox"), format!("0 0 {width} {height}"));
-                            assert_eq!(attr("preserveAspectRatio"), "xMidYMid meet");
-                            checked += 1;
-                        }
-                        b"image" => {
-                            assert_eq!(attr("x"), "0");
-                            assert_eq!(attr("y"), "0");
+                        b"img" => {
                             assert_eq!(attr("width"), width.to_string());
                             assert_eq!(attr("height"), height.to_string());
+                            assert_eq!(attr("src"), format!("../images/page-{n:05}.png"));
                             checked += 1;
                         }
                         _ => {}
@@ -527,7 +527,7 @@ fn epub_pages_have_no_publisher_margins_and_match_each_original_image() {
                 _ => {}
             }
         }
-        assert_eq!(checked, 3);
+        assert_eq!(checked, 2);
         let mut bytes = Vec::new();
         zip.by_name(&format!("OEBPS/images/page-{n:05}.png"))
             .unwrap()
