@@ -1,0 +1,39 @@
+name: Windows portable application
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "assets/**"
+      - "vendor/**"
+      - "Cargo.*"
+      - "build.rs"
+      - ".cargo/**"
+      - "scripts/build-windows.ps1"
+      - ".github/workflows/windows.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Lint
+        run: cargo clippy --locked --all-targets -- -D warnings
+      - name: Test and package
+        shell: pwsh
+        run: ./scripts/build-windows.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Telysta-Windows-x64
+          path: dist/Telysta-Windows-x64.zip
+          if-no-files-found: error

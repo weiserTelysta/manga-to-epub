@@ -1,0 +1,18 @@
+/target/
+/dist/
+/Telysta Books/
+*.zip
+*.7z
+*.rar
+*.epub
+*.pdf
+*.cbz
+!tests/fixtures/**
+/.tools/
+/sources/
+**/Telysta Books/
+.DS_Store
+Thumbs.db
+/vendor/unrar_sys/.cargo-ok
+/vendor/unrar_sys/.cargo_vcs_info.json
+/vendor/unrar_sys/Cargo.lock
