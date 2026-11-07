@@ -1,5 +1,16 @@
 # 验证记录
 
+## 三平台 CI 已通过
+
+[构建 42350187686](https://github.com/weiserTelysta/manga-to-epub/actions/runs/42350187686) 对应应用源码提交 `9598008`，三项作业均成功：
+
+- Windows：MSVC 检查、25 项测试、Release GUI / CLI 与便携 ZIP。
+- Linux：Ubuntu 22.04 检查、25 项测试、Release 打包与 Xvfb 实际 GUI 启动截图。
+- macOS：检查、25 项测试、Intel / Apple Silicon 双架构编译、`lipo` 架构检查、ad-hoc 签名验证与原生 runner 上运行通用 CLI。
+
+Windows 打包脚本另经本机 Windows PowerShell 5.1 解析检查，确认 UTF-8 BOM 能正确保留中文文件路径。
+Mac GUI 尚未由用户在个人设备上人工验证；CI 构建与原生 CLI 运行不等于所有系统版本的桌面实测。
+
 ## v0.2.0 本地检查（2026-11-07）
 
 - `cargo fmt --check`、`cargo clippy --locked --all-targets -- -D warnings`：通过，无警告。

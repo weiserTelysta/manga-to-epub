@@ -1,4 +1,4 @@
-param([switch]$SkipChecks)
+﻿param([switch]$SkipChecks)
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 $ProjectRoot = Split-Path -Parent $PSScriptRoot

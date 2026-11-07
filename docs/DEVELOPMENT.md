@@ -45,7 +45,7 @@ Windows 原生 UI Automation 验证作为实际运行检查，源码测试可以
 ## Git 与发布
 
 远端：`git@github.com:weiserTelysta/manga-to-epub.git`。
-`v0.1.0` 保留首版可用实现；当前迭代在 `ui-redesign` 上开发，通过检查后合入 `main`。
+`v0.1.0` 保留首版可用实现；UI 迭代已从 `ui-redesign` 快进合入 `main`，后续阅读器兼容修复位于 `main`。
 原漫画素材、成品电子书、可执行产物和临时工具由 `.gitignore` 排除；仅很小的测试夹具随源码提交。
 
 推送会触发 `.github/workflows/build.yml`，在 Windows、Ubuntu 与 macOS runner 上分别检查、构建并上传平台产物。
