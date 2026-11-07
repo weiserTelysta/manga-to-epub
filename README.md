@@ -9,11 +9,13 @@
 
 | 平台 | 产物 | 启动方式 |
 | --- | --- | --- |
-| Windows 10 / 11 x64 | `Telysta-Windows-x64.zip` | 解压后双击 `Telysta.exe` |
-| Linux x86_64 | `Telysta-Linux-x86_64.tar.gz` | 解压后运行 `./telysta` |
-| macOS 11+，Intel / Apple Silicon | `Telysta-macOS-universal.zip` | 解压后打开 `Telysta.app` |
+| Windows 10 / 11 x64 | [Telysta-Windows-x64.zip](https://github.com/weiserTelysta/manga-to-epub/releases/latest/download/Telysta-Windows-x64.zip) | 解压后双击 `Telysta.exe` |
+| Linux x86_64 | [Telysta-Linux-x86_64.tar.gz](https://github.com/weiserTelysta/manga-to-epub/releases/latest/download/Telysta-Linux-x86_64.tar.gz) | 解压后运行 `./telysta` |
+| macOS 11+，Intel / Apple Silicon | [Telysta-macOS-universal.zip](https://github.com/weiserTelysta/manga-to-epub/releases/latest/download/Telysta-macOS-universal.zip) | 解压后打开 `Telysta.app` |
 
-已构建的本机版本位于 `dist/`，跨平台产物通过 [GitHub Actions](https://github.com/weiserTelysta/manga-to-epub/actions/workflows/build.yml) 获取。实际验证情况见 [验证记录](docs/VALIDATION.md)。
+从 [GitHub Releases](https://github.com/weiserTelysta/manga-to-epub/releases/latest) 下载发布版本及 `SHA256SUMS.txt` 校验文件。本机构建产物位于 `dist/`，开发中的构建可在 [GitHub Actions](https://github.com/weiserTelysta/manga-to-epub/actions/workflows/build.yml) 获取。实际验证情况见 [验证记录](docs/VALIDATION.md)。
+
+Windows 包尚未进行代码签名，SmartScreen 首次启动提示及校验方法见 [平台说明](docs/PLATFORMS.md#windows)。
 
 1. 选择文件、文件夹，或直接拖入窗口。
 2. 选择输出格式，必要时修改书名和保存位置。

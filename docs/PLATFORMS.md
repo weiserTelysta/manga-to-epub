@@ -12,7 +12,9 @@
 
 ## 下载与构建状态
 
-最新提交的三平台构建在 [GitHub Actions](https://github.com/weiserTelysta/manga-to-epub/actions/workflows/build.yml) 中进行。打开成功的构建记录，从 Artifacts 下载对应系统的包。GitHub 可能要求登录后才能下载构建产物，当前保存期为 90 天。
+发布版本从 [GitHub Releases](https://github.com/weiserTelysta/manga-to-epub/releases/latest) 下载。在 Assets 中选择对应系统的包，`SHA256SUMS.txt` 提供各包的校验值。
+
+开发中的三平台构建在 [GitHub Actions](https://github.com/weiserTelysta/manga-to-epub/actions/workflows/build.yml) 中进行。打开成功的构建记录，从 Artifacts 下载对应系统的包。GitHub 可能要求登录后才能下载 Actions 产物，当前保存期为 90 天。
 
 本机生成的产物位于 `dist/`。macOS 包必须在 Mac 或 GitHub 的 macOS runner 上生成，Linux 环境不伪造 Mac 构建结果。
 具体完成与验证情况见 [验证记录](VALIDATION.md)。
@@ -20,6 +22,16 @@
 ## Windows
 
 直接双击可执行文件，也可把本地压缩包拖到窗口。文件和文件夹选择框为 Windows 原生对话框。
+
+当前 Windows 包尚未进行 Authenticode 代码签名，首次启动可能出现 SmartScreen 的“Windows 已保护你的电脑”和“发布者未知”。
+从本项目 Release 下载后，可在 PowerShell 中核对压缩包的 SHA-256，与同一 Release 中的 `SHA256SUMS.txt` 比较：
+
+```powershell
+Get-FileHash .\Telysta-Windows-x64.zip -Algorithm SHA256
+```
+
+确认来源和校验值后，点击“更多信息 → 仍要运行”；如果界面已经显示“仍要运行”，可直接点击。
+可信代码签名用于验证发布者身份，新签名程序仍可能在积累信誉期间收到提示，见 [Microsoft 的 SmartScreen 说明](https://learn.microsoft.com/windows/apps/package-and-deploy/smartscreen-reputation)。
 
 源码构建需要 Rust 1.93+、Visual Studio C++ Build Tools 与 Windows SDK：
 
